@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import numpy as np
 from ase.io import read, write
 from ase.constraints import Filter, FixAtoms
@@ -9,9 +7,10 @@ from ase.optimize.precon.neighbors import estimate_nearest_neighbour_distance
 
 import optparse
 parser = optparse.OptionParser()
-parser.add_option("-i", "--informat", dest="informat", default='aims',
+parser.add_option("-f", "--formatfile", dest="formatfile", default='aims',
                     help="Input format extension ")
-parser.add_option("-g", "--geometry", dest="geometry", help="geometry file")
+parser.add_option("-i", "--inputfile", dest="inputfile", help="input geometry file")
+parser.add_option("-o", "--outputfile", dest="outputfile", help="output Hessian file")
 parser.add_option("--A", type=float, dest="A",
                     help="Parameter A")
 options, args = parser.parse_args()
@@ -55,7 +54,7 @@ def vector_separation(cell_h, cell_ih, qi, qj):
     return dij, rij
 
 
-atoms = read(options.geometry, format = options.informat)
+atoms = read(options.inputfile, format = options.formatfile)
 N  = len(atoms)
 A=options.A
 r_NN = estimate_nearest_neighbour_distance(atoms)
@@ -85,7 +84,7 @@ hessian = hessian + hessian.T - np.diag(hessian.diagonal())
 for ind in range(len(hessian)):
     hessian[ind, ind] = -np.sum(hessian[ind])
 
-with open("Hessian_Exp.dat", 'w') as hes:
+with open(options.outputfile, 'w') as hes:
     for i in hessian:
         hes.write(' '.join(["{:8.3f}".format(k) for k in i]))
         hes.write('\n')
